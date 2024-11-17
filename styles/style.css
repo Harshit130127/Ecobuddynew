@@ -1,0 +1,74 @@
+/* Body styling */
+body {
+    background-color: #28a745; /* Green background */
+    font-family: 'Arial', sans-serif; /* Custom font */
+    color: rgb(227, 207, 207); /* Default text color */
+}
+
+/* Container styling */
+.container {
+    margin-top: 50px; /* Space from the top */
+    text-align: center; /* Centered text */
+}
+
+/* Large box styling for the main content */
+.large-box {
+    background: linear-gradient(135deg, rgba(40, 167, 69, 0.9), rgba(20, 120, 50, 0.9)); /* Gradient background */
+    padding: 40px; /* Padding inside the box */
+    border-radius: 15px; /* Rounded corners */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); /* Soft shadow for depth */
+    color: white; /* White text for better contrast */
+}
+
+/* Heading styling */
+h1 {
+    color: white; /* White color for heading */
+    font-size: 2.5rem; /* Larger font size */
+    margin-bottom: 20px; /* Space below heading */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Subtle shadow for depth */
+}
+
+/* Button styling */
+.btn {
+    margin: 10px; /* Space between buttons */
+    padding: 10px 20px; /* Padding inside buttons */
+    font-size: 1.2rem; /* Larger font size for buttons */
+    border-radius: 5px; /* Rounded corners for buttons */
+    transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth transitions */
+}
+
+/* Primary button styling (green background) */
+.btn-primary {
+    background-color: white; /* White background for primary button */
+    border-color: #007bff; /* Border color matches blue theme */
+    color: #28a745; /* Green text for contrast against white background */
+}
+
+.btn-primary:hover {
+    background-color: #e2e6ea; /* Light gray on hover for primary button */
+    transform: scale(1.05); /* Slightly enlarge button on hover */
+}
+
+/* Secondary button styling (white background) */
+.btn-secondary {
+    background-color: white; /* White background for secondary button */
+    border-color: #6c757d; /* Border color matches gray theme */
+    color: #28a745; /* Green text for contrast against white background */
+}
+
+.btn-secondary:hover {
+    background-color: #e2e6ea; /* Light gray on hover for secondary button */
+    transform: scale(1.05); /* Slightly enlarge button on hover */
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 576px) {
+    h1 {
+        font-size: 2rem; /* Smaller heading size on small screens */
+    }
+
+    .btn {
+        font-size: 1rem; /* Smaller button size on small screens */
+        padding: 8px 16px; /* Adjust padding for smaller buttons */
+    }
+}

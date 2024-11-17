@@ -1,0 +1,99 @@
+/* General Body Styles */
+body {
+    background-color: #e8f5e9; /* Light green background for freshness */
+    color: #333; /* Dark text for readability */
+    font-family: 'Arial', sans-serif; /* Clean font style */
+}
+
+/* Container Styles */
+.container {
+    margin-top: 50px; /* Space from the top */
+    padding: 30px; /* Padding inside the container */
+    background-color: #ffffff; /* White background for the container */
+    border-radius: 10px; /* Rounded corners */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Subtle shadow effect */
+}
+
+/* Heading Styles */
+h2 {
+    text-align: center; /* Centered heading */
+    margin-bottom: 30px; /* Space below the heading */
+    color: #388e3c; /* Dark green color for headings */
+}
+
+/* Alert Message Styles */
+.alert {
+    border-radius: 5px; /* Rounded corners for alerts */
+}
+
+/* Form Styles */
+input[type="text"] {
+    border-radius: 5px; /* Rounded corners for input fields */
+}
+
+.btn {
+    border-radius: 5px; /* Rounded corners for buttons */
+}
+
+/* Button Styles */
+.btn-primary {
+    background-color: #66bb6a; /* Light green button color */
+    border-color: #4caf50; /* Border color for button */
+}
+
+.btn-primary:hover {
+    background-color: #57a05c; /* Darker shade on hover */
+}
+
+.btn-success {
+    background-color: #81c784; /* Lighter green for success buttons */
+}
+
+.btn-success:hover {
+    background-color: #75b367; /* Darker shade on hover */
+}
+
+.btn-warning {
+    background-color: #ffb300; /* Yellow for warning buttons */
+}
+
+.btn-warning:hover {
+    background-color: #ff9f00; /* Darker shade on hover */
+}
+
+.btn-danger {
+    background-color: #ef5350; /* Red for danger buttons */
+}
+
+.btn-danger:hover {
+    background-color: #e53935; /* Darker shade on hover */
+}
+
+/* Table Styles */
+table {
+    width: 100%;
+    border-collapse: collapse; /* Ensures borders are collapsed */
+}
+
+th, td {
+    border: 1px solid #ddd; /* Adds border to cells */
+    padding: 12px; /* Adds padding for better spacing */
+    text-align: left; /* Align text to the left */
+}
+
+th {
+    background-color: #c8e6c9; /* Light green background for header */
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9; /* Alternating row colors for better readability */
+}
+
+tr:hover {
+    background-color: #dcedc8; /* Highlight row on hover with light green shade */
+}
+
+/* Image Styles in Table Cells */
+img {
+    max-width: 100%; /* Responsive image sizing within table cells */
+}
