@@ -1,5 +1,7 @@
 <?php
-require_once '../models/usermodel.php';
+
+require_once __DIR__ . '/../config/config.php';
+require_once __DIR__ . '/../models/usermodel.php';
 
 class usercontroller {
     private $userModel;

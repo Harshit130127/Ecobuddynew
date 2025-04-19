@@ -1,119 +1,119 @@
 <?php
-require_once '../config/config.php';
-
-class ecofacilitymodel {
+class EcoFacilityModel {
     private $db;
 
     public function __construct() {
-        global $mysqli; // Use the global mysqli connection
-        $this->db = $mysqli; // Assign the global mysqli connection to the class property
-
-        // Check if the db connection is valid
-        if ($this->db === null) {
-            die("Database connection not established.");
-        }
+        global $db;
+        $this->db = $db;
     }
 
-    public function createFacility($title, $category, $description, $location, $latitude, $longitude, $photo,$status_of_facility) {
-        global $mysqli;
-        $stmt = $mysqli->prepare("INSERT INTO ecofacilities (title, category, description, location, latitude, longitude,  photo, status_of_facility) VALUES (?, ?,?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("ssssssss", $title, $category, $description, $location, $latitude, $longitude,  $photo,$status_of_facility);
+    public function createFacility($title, $category, $description, $location, $latitude, $longitude, $photo, $status) {
+        $stmt = $this->db->prepare("
+            INSERT INTO ecofacilities 
+            (title, category, description, location, latitude, longitude, photo, status_of_facility) 
+            VALUES 
+            (:title, :category, :desc, :location, :lat, :lng, :photo, :status)
+        ");
+        
+        $stmt->bindValue(':title', $title, SQLITE3_TEXT);
+        $stmt->bindValue(':category', $category, SQLITE3_TEXT);
+        $stmt->bindValue(':desc', $description, SQLITE3_TEXT);
+        $stmt->bindValue(':location', $location, SQLITE3_TEXT);
+        $stmt->bindValue(':lat', $latitude, SQLITE3_TEXT);  // Change to SQLITE3_FLOAT
+        $stmt->bindValue(':lng', $longitude, SQLITE3_TEXT); // Change to SQLITE3_FLOAT
+        $stmt->bindValue(':photo', $photo, SQLITE3_TEXT);
+        $stmt->bindValue(':status', $status, SQLITE3_TEXT);
+        
         return $stmt->execute();
     }
 
+    // Get facilities
     public function getFacilities($search = '') {
-    global $mysqli; // Assuming $mysqli is your database connection
-
-    if ($search) {
-        // Prepare the statement
-        $stmt = $mysqli->prepare("SELECT * FROM ecofacilities WHERE title LIKE ? OR category LIKE ?");
-        $searchParam = "%$search%";
-        $stmt->bind_param("ss", $searchParam, $searchParam);
-    } else {
-        // Prepare the statement for retrieving all facilities
-        $stmt = $mysqli->prepare("SELECT * FROM ecofacilities");
+        $searchTerm = "%$search%";
+        
+        $stmt = $this->db->prepare("
+            SELECT * FROM ecofacilities 
+            WHERE title LIKE :search OR category LIKE :search
+        ");
+        $stmt->bindValue(':search', $searchTerm, SQLITE3_TEXT);
+        
+        $result = $stmt->execute();
+        $facilities = [];
+        
+        while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+            $facilities[] = $row;
+        }
+        
+        return $facilities;
     }
 
-    // Execute the statement
-    if (!$stmt->execute()) {
-        return []; // Return an empty array on failure
+    // Update facility
+    public function updateFacility($id, $title, $category, $description, $location, $latitude, $longitude, $photo, $status) {
+        try {
+            $stmt = $this->db->prepare("
+                UPDATE ecofacilities SET
+                    title = :title,
+                    category = :category,
+                    description = :desc,
+                    location = :location,
+                    latitude = :lat,
+                    longitude = :lng,
+                    photo = :photo,
+                    status_of_facility = :status
+                WHERE id = :id
+            ");
+            
+            // Bind all parameters
+            $stmt->bindValue(':id', $id, SQLITE3_INTEGER);
+            $stmt->bindValue(':title', $title, SQLITE3_TEXT);
+            $stmt->bindValue(':category', $category, SQLITE3_TEXT);
+            $stmt->bindValue(':desc', $description, SQLITE3_TEXT);
+            $stmt->bindValue(':location', $location, SQLITE3_TEXT);
+            $stmt->bindValue(':lat', $latitude, SQLITE3_TEXT);  // Change to SQLITE3_FLOAT
+            $stmt->bindValue(':lng', $longitude, SQLITE3_TEXT); // Change to SQLITE3_FLOAT
+            $stmt->bindValue(':photo', $photo, SQLITE3_TEXT);
+            $stmt->bindValue(':status', $status, SQLITE3_TEXT);
+            
+            $result = $stmt->execute();
+            
+            if (!$result) {
+                throw new Exception("SQL Error: " . $this->db->lastErrorMsg());
+            }
+            
+            return true;
+        } catch (Exception $e) {
+            error_log("Update failed: " . $e->getMessage());
+            return false;
+        }
     }
 
-    // Get the result set from the prepared statement
-    $result = $stmt->get_result();
-    
-    // Fetch all results as an associative array
-    return $result->fetch_all(MYSQLI_ASSOC);
-}
-
-    public function updateFacility($id, $title, $category, $description, $location, $latitude, $longitude,  $photo,$status_of_facility) {
-        global $mysqli;
-        $stmt = $mysqli->prepare("UPDATE ecofacilities SET title = ?, category = ?, description = ?, location = ?, latitude = ?, longitude = ?,  photo = ?, status_of_facility=? WHERE id = ?");
-        $stmt->bind_param("ssssssssi", $title, $category, $description, $location, $latitude, $longitude, $photo,$status_of_facility, $id);
-        return $stmt->execute();
-    }
-
+    // Delete facility
     public function deleteFacility($id) {
-        global $mysqli;
-        $stmt = $mysqli->prepare("DELETE FROM ecofacilities WHERE id = ?");
-        $stmt->bind_param("i", $id);
+        $stmt = $this->db->prepare("DELETE FROM ecofacilities WHERE id = :id");
+        $stmt->bindValue(':id', $id, SQLITE3_INTEGER);
         return $stmt->execute();
     }
+
+    // Get single facility
     public function getFacilityById($id) {
-        // Prepare statement to fetch facility by ID
-        $stmt = $this->db->prepare("SELECT * FROM ecofacilities WHERE id=?");
-        
-        if ($stmt === false) {
-            die("Prepare failed: (" . $this->db->errno . ") " . $this->db->error);
-        }
-
-        $id = intval($id); // Ensure id is an integer
-        if (!$stmt->bind_param('i', $id)) {
-            die("Binding parameters failed: (" . $this->db->errno . ") " . $this->db->error);
-        }
-
-        if (!$stmt->execute()) {
-            die("Execute failed: (" . $this->db->errno . ") " . $this->db->error);
-        }
-
-        // Fetch result
-        $result = $stmt->get_result();
-        
-        if ($result->num_rows > 0) {
-            return $result->fetch_assoc(); // Return associative array of facility data
-        } else {
-            return null; // No facility found with that ID
-        }
-        
-        // Close statement
-        $stmt->close();
-    }
-    public function updateFacilityReview($facilityId, $reviewText) {
-        global $mysqli; // Assuming you have a mysqli connection set up
-
-        // Prepare and execute the update statement
-        $stmt = $mysqli->prepare("UPDATE ecofacilities SET reviews = ? WHERE id = ?");
-        $stmt->bind_param("si", $reviewText, $facilityId); // "si" means string and integer
-
-        return $stmt->execute(); // Returns true on success or false on failure
+        $stmt = $this->db->prepare("SELECT * FROM ecofacilities WHERE id = :id");
+        $stmt->bindValue(':id', $id, SQLITE3_INTEGER);
+        $result = $stmt->execute();
+        return $result->fetchArray(SQLITE3_ASSOC);
     }
 
-    public function updateFacilityReviewByTitle( $reviewText,$facilityTitle) {
-        global $mysqli;
-    
-        // Prepare and execute the update statement using title to find the correct facility
-        $stmt = $mysqli->prepare("UPDATE ecofacilities SET reviews = ? WHERE title = ?");
+    // Update reviews
+    public function updateFacilityReview($id, $review) {
+        $stmt = $this->db->prepare("
+            UPDATE ecofacilities 
+            SET reviews = :review 
+            WHERE id = :id
+        ");
         
-        if ($stmt === false) {
-            die("Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error);
-        }
-    
-        // Bind parameters and execute statement
-        if (!$stmt->bind_param("ss", $reviewText, $title)) {
-            die("Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error);
-        }
-    
-        return $stmt->execute(); // Returns true on success or false on failure
+        $stmt->bindValue(':id', $id, SQLITE3_INTEGER);
+        $stmt->bindValue(':review', $review, SQLITE3_TEXT);
+        
+        return $stmt->execute();
     }
 }
 ?>

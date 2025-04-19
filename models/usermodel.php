@@ -1,34 +1,64 @@
 <?php
-require_once '../config/config.php';
+require_once __DIR__ . '/../config/config.php'; // Include config file
 
 class usermodel {
-    private $conn;
+    private $db;
 
     public function __construct() {
-        global $mysqli; // Use the global mysqli connection
-        $this->conn = $mysqli; // Assign the global mysqli connection to the class property
-
-        // Check if the db connection is valid
-        if ($this->conn === null) {
-            die("Database connection not established.");
-        }
+        $this->db = getDB(); // Get database connection
     }
-    
+
+    // Get user by username
     public function getUser($username) {
-        $query = "SELECT * FROM users WHERE username = ?";
-        $stmt = $this->conn->prepare($query); // Prepare the statement
+        $stmt = $this->db->prepare("SELECT * FROM users WHERE username = :username");
+        $stmt->bindValue(':username', $username, SQLITE3_TEXT);
+        $result = $stmt->execute();
+        return $result->fetchArray(SQLITE3_ASSOC);
+    }
+
+    // Create new user
+    public function createUser($username, $password, $userType) {
+        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
         
-        if ($stmt === false) {
-            die("Prepare failed: (" . $this->conn->errno . ") " . $this->conn->error);
-        }
-    
-        $stmt->bind_param("s", $username); // Bind the parameter
-        if (!$stmt->execute()) {
-            die("Execute failed: (" . $this->conn->errno . ") " . $this->conn->error);
-        }
-    
-        $result = $stmt->get_result(); // Get the result set
-        return $result->fetch_assoc(); // Fetch the associative array
+        $stmt = $this->db->prepare("
+            INSERT INTO users 
+            (username, password, user_type) 
+            VALUES 
+            (:username, :password, :user_type)
+        ");
+        
+        $stmt->bindValue(':username', $username, SQLITE3_TEXT);
+        $stmt->bindValue(':password', $hashedPassword, SQLITE3_TEXT);
+        $stmt->bindValue(':user_type', $userType, SQLITE3_TEXT);
+        
+        return $stmt->execute();
+    }
+
+    // Update user password
+    public function updatePassword($userId, $newPassword) {
+        $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+        
+        $stmt = $this->db->prepare("
+            UPDATE users 
+            SET password = :password 
+            WHERE id = :id
+        ");
+        
+        $stmt->bindValue(':id', $userId, SQLITE3_INTEGER);
+        $stmt->bindValue(':password', $hashedPassword, SQLITE3_TEXT);
+        
+        return $stmt->execute();
+    }
+
+    // Get user by ID
+    public function getUserById($userId) {
+        $stmt = $this->db->prepare("
+            SELECT * FROM users 
+            WHERE id = :id
+        ");
+        $stmt->bindValue(':id', $userId, SQLITE3_INTEGER);
+        $result = $stmt->execute();
+        return $result->fetchArray(SQLITE3_ASSOC);
     }
 }
 ?>

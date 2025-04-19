@@ -1,0 +1,178 @@
+/* Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: linear-gradient(135deg, #e8f5e9 0%, #a5d6a7 100%);
+    color: #333;
+    font-family: 'Roboto', 'Arial', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+/* Container Styles */
+.container {
+    width: 100%;
+    max-width: 600px;
+    background-color: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    padding: 40px;
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* Keyframe Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Heading Styles */
+h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #2e7d32;
+    font-weight: 700;
+    position: relative;
+    padding-bottom: 10px;
+}
+
+h2::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 3px;
+    background-color: #4caf50;
+}
+
+/* Form Group Styles */
+.form-group {
+    margin-bottom: 20px;
+    position: relative;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    color: #2e7d32;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+/* Input Styles */
+.form-control {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    font-size: 16px;
+}
+
+.form-control:focus {
+    border-color: #4caf50;
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+    outline: none;
+}
+
+/* Textarea Specific Styles */
+textarea.form-control {
+    resize: vertical;
+    min-height: 120px;
+}
+
+/* Button Styles */
+.btn-warning {
+    width: 100%;
+    padding: 12px;
+    background-color: #ff9800;
+    border: none;
+    color: white;
+    border-radius: 8px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+}
+
+.btn-warning:hover {
+    background-color: #f57c00;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.btn-warning:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .container {
+        padding: 20px;
+        margin: 20px auto;
+        width: 95%;
+        max-width: 100%;
+    }
+
+    .form-control {
+        padding: 10px;
+        font-size: 14px;
+    }
+}
+
+/* Input Validation Styles */
+.form-control.is-invalid {
+    border-color: #f44336;
+}
+
+.invalid-feedback {
+    color: #f44336;
+    font-size: 0.9em;
+    margin-top: 5px;
+}
+
+/* Subtle Decorative Elements */
+.form-group::before {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 30px;
+    height: 2px;
+    background-color: #4caf50;
+    opacity: 0.5;
+}
+
+/* Accessibility and Focus States */
+.form-control:focus + label,
+.form-group:focus-within label {
+    color: #2e7d32;
+}
+
+/* Print Styles */
+@media print {
+    body {
+        background: white;
+    }
+    
+    .container {
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+}

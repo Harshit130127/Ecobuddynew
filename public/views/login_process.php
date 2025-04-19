@@ -1,7 +1,13 @@
 
 <?php
+
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 session_start();
-require_once '../controllers/usercontroller.php'; // Adjusted path
+define('ROOT_DIR', dirname(__DIR__) . '/../');
+
+require_once ROOT_DIR . 'controllers/usercontroller.php';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $username = filter_input(INPUT_POST, 'username', FILTER_SANITIZE_STRING);
