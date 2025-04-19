@@ -28,6 +28,16 @@ $db->exec("
   )
 ");
 
+$db->exec("CREATE TABLE IF NOT EXISTS reviews (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  facility_id INTEGER NOT NULL,
+  user_id INTEGER NOT NULL,  
+  review_text TEXT NOT NULL,
+  date TEXT NOT NULL,
+  FOREIGN KEY (facility_id) REFERENCES ecofacilities(id),
+  FOREIGN KEY (user_id) REFERENCES users(id)
+)");
+
 // Insert test accounts
 $password_admin = password_hash('Admin@SecurePass123!', PASSWORD_DEFAULT);
 $password_lee = password_hash('Lee@SecurePass456!', PASSWORD_DEFAULT);

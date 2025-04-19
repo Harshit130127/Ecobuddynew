@@ -118,6 +118,7 @@ $facilities = $ecoFacilityController ->getFacilities($searchTerm);
                                 <th>Longitude</th>
                                 <th>Status</th>
                                 <th>Photo</th>
+                                <th>Review</th> <!-- New Review Column -->
                             </tr>
                         </thead>
                         <tbody id="facilitiesTableBody">
@@ -163,40 +164,46 @@ $facilities = $ecoFacilityController ->getFacilities($searchTerm);
 
         // Dynamically update facilities table rows
         function updateFacilitiesTable(facilities) {
-            const tbody = document.getElementById('facilitiesTableBody');
-            tbody.innerHTML = '';
+    const tbody = document.getElementById('facilitiesTableBody');
+    tbody.innerHTML = '';
 
-            if (!facilities || facilities.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="9" class="text-center">No facilities found.</td></tr>';
-                return;
-            }
+    if (!facilities || facilities.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="10" class="text-center">No facilities found.</td></tr>';
+        return;
+    }
 
-            facilities.forEach((facility, index) => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td>${escapeHtml(facility.title)}</td>
-                    <td>${escapeHtml(facility.category)}</td>
-                    <td>${escapeHtml(facility.description || '')}</td>
-                    <td>${escapeHtml(facility.location || '')}</td>
-                    <td>${escapeHtml(facility.latitude)}</td>
-                    <td>${escapeHtml(facility.longitude)}</td>
-                    <td>
-                        <span class="badge ${facility.status_of_facility === 'active' ? 'badge-success' : 'badge-danger'}">
-                            ${escapeHtml(facility.status_of_facility)}
-                        </span>
-                    </td>
-                    <td>
-                        ${facility.photo ? `<img src="${escapeHtml(facility.photo)}" alt="Facility Photo" class="facility-thumbnail" onerror="this.onerror=null;this.src='https://via.placeholder.com/150'">` : 'No Photo'}
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
+    facilities.forEach((facility, index) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${escapeHtml(facility.title)}</td>
+            <td>${escapeHtml(facility.category)}</td>
+            <td>${escapeHtml(facility.description || '')}</td>
+            <td>${escapeHtml(facility.location || '')}</td>
+            <td>${escapeHtml(facility.latitude)}</td>
+            <td>${escapeHtml(facility.longitude)}</td>
+            <td>
+                <span class="badge ${facility.status_of_facility === 'active' ? 'badge-success' : 'badge-danger'}">
+                    ${escapeHtml(facility.status_of_facility)}
+                </span>
+            </td>
+            <td>
+                ${facility.photo ? `<img src="${escapeHtml(facility.photo)}" alt="Facility Photo" class="facility-thumbnail" onerror="this.onerror=null;this.src='https://via.placeholder.com/150'">` : 'No Photo'}
+            </td>
+            <td>
+                <a href="userlogin.php" class="btn btn-primary" onclick="setFacilityId(${facility.id})">Review</a>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
 
-        // // Listen to search input and update map markers & table
-        // document.getElementById('searchInput').addEventListener('input', function (e) {
-        //     const searchTerm = e.target.value.trim();
+// Function to set facility ID in session storage
+function setFacilityId(facility.id) {
+    sessionStorage.setItem('facilityId', facilityid);
+}
+
+       
 
             // Debounce to avoid too many requests
             clearTimeout(window.searchTimeout);

@@ -3,11 +3,11 @@
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../models/usermodel.php';
 
-class usercontroller {
+class UserController {
     private $userModel;
 
     public function __construct() {
-        $this->userModel = new usermodel();
+        $this->userModel = new UserModel();
     }
 
     public function register($username, $password, $userType) {
@@ -28,10 +28,16 @@ class usercontroller {
         if ($user && password_verify($password, $user['password'])) {
             session_start();
             $_SESSION['user_id'] = $user['id'];
+            $_SESSION['username'] = $username; // Store username in session
             $_SESSION['user_type'] = $user['user_type'];
             return true;
         }
         return false;
+    }
+
+    // Method to validate user credentials
+    public function validateUser ($username, $password) {
+        return $this->login($username, $password);
     }
 }
 ?>

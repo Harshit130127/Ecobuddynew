@@ -1,40 +1,105 @@
 <?php
+// Enable full error reporting
 session_start();
 
-// Check if user is logged in
-if (!isset($_SESSION['user_id'])) {
-    header("Location: userlogin.php"); // Redirect to login if not logged in
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+// Critical facility check at top
+$facilityId = $_SESSION['facilityId'] ?? null;
+if (!$facilityId) {
+    $_SESSION['error'] = "No facility selected. Please select a facility first.";
+    header("Location: public.php");
     exit();
 }
 
-// Get facility ID from query string
-$facilityId = isset($_GET['facility_id']) ? intval($_GET['facility_id']) : 0;
+require_once __DIR__ . '/../../controllers/ecofacilitycontroller.php';
 
-// Include database connection and model if needed
-require_once '../controllers/ecofacilitycontroller.php';
+// Debug session state
+error_log("Session data at start: " . print_r($_SESSION, true));
+
+// Check if user is logged in
+// Check if user is properly logged in with ID
+if (!isset($_SESSION['user_id']) || !is_numeric($_SESSION['user_id'])) {
+    $_SESSION['error'] = "Please login first";
+    header("Location: userlogin.php");
+    exit();
+}
+
+// Instantiate the EcoFacilityController
 $ecoFacilityController = new EcoFacilityController();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Ensure facility ID is set and valid
-    if ($facilityId <= 0) {
-        die("Invalid facility ID.");
-    }
-    
+    error_log("POST request received");
+    error_log("Raw POST data: " . print_r($_POST, true));
+
     // Capture and sanitize review text
-    $reviewText = filter_input(INPUT_POST, 'review', FILTER_SANITIZE_STRING);
+    $reviewText = filter_input(INPUT_POST, 'review', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+    $userId = $_SESSION['user_id'] ?? null;
+    $date = date('Y-m-d H:i:s');
+    $facilityId = $_SESSION['facilityId'] ?? null;
 
-    // Update the facility's review in the eco_facilities table
-    if ($ecoFacilityController->updateFacilityReview($facilityId, $reviewText)) {
-        // Redirect with a success message in the query string
-        header("Location: public.php?message=success");
+    error_log("Processed review data - Facility: $facilityId, UserID: $userId, Date: $date");
+
+    // Validate critical data
+    if (empty($facilityId)) {
+        error_log("Critical error: facilityId not set in session");
+        $_SESSION['error'] = "Facility not selected properly. Please try again.";
+        header("Location: review.php");
         exit();
-    } else {
-        $_SESSION['error'] = "Failed to submit review.";
-        echo $_SESSION['error']; // For debugging purposes
     }
-}
-?>
 
+    if (!$userId) {
+        error_log("Critical error: user_id not set in session");
+        $_SESSION['error'] = "Authentication error. Please login again.";
+        header("Location: userlogin.php");
+        exit();
+    }
+
+    if (empty($reviewText)) {
+        error_log("Validation error: Empty review text");
+        $_SESSION['error'] = "Review text cannot be empty";
+        header("Location: review.php");
+        exit();
+    }
+
+    // Store the review in the database
+    try {
+        error_log("Attempting to add review to database...");
+        $success = $ecoFacilityController->addReview(
+            $facilityId, 
+            $userId,
+            $reviewText,
+            $date
+        );
+        
+        if ($success) {
+            error_log("Review submission successful");
+            $_SESSION['message'] = "Review submitted successfully!";
+        } else {
+            error_log("Database operation failed without exception");
+            $_SESSION['error'] = "Failed to submit review. Please try again later.";
+        }
+    } catch (Exception $e) {
+        error_log("Database exception: " . $e->getMessage());
+        $_SESSION['error'] = "A system error occurred. Our team has been notified.";
+    }
+
+    header("Location: review.php");
+    exit();
+}
+
+// Fetch existing reviews
+error_log("Fetching reviews for facility ID: " . ($_SESSION['facilityId'] ?? 'NOT_SET'));
+$reviews = [];
+try {
+    $reviews = $ecoFacilityController->getReviews($_SESSION['facilityId'] ?? 0);
+    error_log("Retrieved " . count($reviews) . " reviews");
+} catch (Exception $e) {
+    error_log("Error fetching reviews: " . $e->getMessage());
+    $_SESSION['error'] = "Error loading existing reviews";
+}
 ?>
 
 <!DOCTYPE html>
@@ -43,25 +108,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Submit Review</title>
-    
-    <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    
-    <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="../css/review.css"> 
+    <link rel="stylesheet" href="../../css/review.css">
 </head>
 <body>
-    <!-- Background Elements -->
-    <div class="background-image"></div>
-    <div class="background-overlay"></div>
-
     <div class="container">
         <?php if (isset($_SESSION['message'])): ?>
             <div class="alert alert-success">
-                <i class="fas fa-check-circle mr-2"></i>
                 <?php echo htmlspecialchars($_SESSION['message']); ?>
                 <?php unset($_SESSION['message']); ?>
             </div>
@@ -69,54 +122,68 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <?php if (isset($_SESSION['error'])): ?>
             <div class="alert alert-danger">
-                <i class="fas fa-exclamation-triangle mr-2"></i>
                 <?php echo htmlspecialchars($_SESSION['error']); ?>
                 <?php unset($_SESSION['error']); ?>
             </div>
         <?php endif; ?>
 
-        <h5>
-            <i class="fas fa-comment-dots text-success mr-2"></i>
-            Submitting Review for Facility
-        </h5>
-
+        <h5>Submit Your Review</h5>
         <form action="" method="POST">
             <div class="form-group">
-                <label for="review">
-                    <i class="fas fa-edit text-success mr-2"></i>
-                    Your Review
-                </label>
-                <textarea 
-                    class="form-control" 
-                    id="review" 
-                    name="review" 
-                    rows="5" 
-                    maxlength="500" 
-                    required
-                    placeholder="Share your thoughts about this eco facility..."
-                ></textarea>
-                <div class="char-count" id="char-count">0 / 500</div>
+                <label for="review">Your Review</label>
+                <textarea class="form-control" id="review" name="review" rows="5" required></textarea>
+                <div class="text-right mt-2">
+                    <small><span id="char-count">0</span>/500 characters</small>
+                </div>
             </div>
-            <button type="submit" class="btn btn-primary">
-                <i class="fas fa-paper-plane mr-2"></i>
-                Submit Review
-            </button>
+            <button type="submit" class="btn btn-primary">Submit Review</button>
         </form>
+
+        <h5 class="mt-4">Existing Reviews</h5>
+        <div class="reviews">
+            <?php if (empty($reviews)): ?>
+                <p>No reviews found for this facility.</p>
+            <?php else: ?>
+                <?php foreach ($reviews as $review): 
+                    // Get username from users table using user_id
+                    try {
+                        $user = $ecoFacilityController->getUserById($review['user_id']);
+                    } catch (Exception $e) {
+                        error_log("Error fetching user: " . $e->getMessage());
+                        $user = ['username' => 'Unknown User'];
+                    }
+                ?>
+                    <div class="review">
+                        <strong><?= htmlspecialchars($user['username']) ?></strong>
+                        <em><?= htmlspecialchars($review['date']) ?></em>
+                        <p><?= htmlspecialchars($review['review_text']) ?></p>
+                    </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </div>
     </div>
 
-    <!-- Include Bootstrap JS and dependencies -->
-    <script src="https:// code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
     <script>
-        // Character count functionality
+        // Enhanced character counter with validation
         const textarea = document.getElementById('review');
         const charCount = document.getElementById('char-count');
+        const MAX_CHARS = 500;
 
         textarea.addEventListener('input', function() {
             const length = textarea.value.length;
-            charCount.textContent = `${length} / 500`;
+            charCount.textContent = `${length}/${MAX_CHARS}`;
+            charCount.style.color = length > MAX_CHARS ? 'red' : 'inherit';
+        });
+
+        document.querySelector('form').addEventListener('submit', function(e) {
+            if (textarea.value.length > MAX_CHARS) {
+                e.preventDefault();
+                alert(`Review cannot exceed ${MAX_CHARS} characters`);
+            }
         });
     </script>
 </body>

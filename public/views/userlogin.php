@@ -12,10 +12,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="../css/user.css">
+    <link rel="stylesheet" href="../../css/user.css">
 </head>
 <body>
-    <!-- Background Elements -->
     <div class="background-image"></div>
     <div class="background-overlay"></div>
 
@@ -47,12 +46,7 @@
                             <i class="fas fa-user"></i>
                         </span>
                     </div>
-                    <input type="text" 
-                           class="form-control" 
-                           id="username" 
-                           name="username" 
-                           placeholder="Enter your username" 
-                           required>
+                    <input type="text" class="form-control" id="username" name="username" placeholder="Enter your username" required>
                 </div>
             </div>
 
@@ -66,52 +60,30 @@
                             <i class="fas fa-lock"></i>
                         </span>
                     </div>
-                    <input type="password" 
-                           class="form-control" 
-                           id="password" 
-                           name="password" 
-                           placeholder="Enter your password" 
-                           required>
-                    <div class="input-group-append">
-                        <span class="input-group-text toggle-password bg-success text-white" style="cursor: pointer;">
-                            <i class="fas fa-eye-slash"></i>
-                        </span>
-                    </div>
+                    <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
                 </div>
             </div>
-            
+
             <!-- Hidden input for facility_id -->
-            <input type="hidden" 
-                   name="facility_id" 
-                   value="<?php echo isset($_GET['facility_id']) ? htmlspecialchars($_GET['facility_id']) : ''; ?>">
-            
+            <input type="hidden" name="facility_id" id="facility_id">
+
             <button type="submit" class="btn btn-primary btn-block">
                 <i class="fas fa-sign-in-alt mr-2"></i>Login
             </button>
         </form>
     </div>
 
+    <script>
+        // Retrieve facility ID from session storage
+        const facilityId = sessionStorage.getItem('facilityId');
+        if (facilityId) {
+            document.getElementById('facility_id').value = facilityId;
+        }
+    </script>
+
     <!-- Include Bootstrap JS and dependencies -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
-    <script>
-        // Password visibility toggle
-        $(document).ready(function() {
-            $('.toggle-password').click(function() {
-                const passwordField = $('#password');
-                const icon = $(this).find('i');
-                
-                if (passwordField.attr('type') === 'password') {
-                    passwordField.attr('type', 'text');
-                    icon.removeClass('fa-eye-slash').addClass('fa-eye');
-                } else {
-                    passwordField.attr('type', 'password');
-                    icon.removeClass('fa-eye').addClass('fa-eye-slash');
-                }
-            });
-        });
-    </script>
 </body>
 </html>

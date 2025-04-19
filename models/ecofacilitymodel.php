@@ -115,5 +115,54 @@ class EcoFacilityModel {
         
         return $stmt->execute();
     }
+
+     // Add a review
+     public function addReview($facilityId, $userId, $reviewText, $date) {
+        try {
+            $stmt = $this->db->prepare("
+                INSERT INTO reviews 
+                (facility_id, user_id, review_text, date) 
+                VALUES 
+                (:facility_id, :user_id, :review_text, :date)
+            ");
+            
+            $stmt->bindValue(':facility_id', $facilityId, SQLITE3_INTEGER);
+            $stmt->bindValue(':user_id', $userId, SQLITE3_INTEGER);
+            $stmt->bindValue(':review_text', $reviewText, SQLITE3_TEXT);
+            $stmt->bindValue(':date', $date, SQLITE3_TEXT);
+            
+            return $stmt->execute();
+        } catch (Exception $e) {
+            error_log("Database error in addReview: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    // Fetch reviews for a specific facility
+    public function getReviews($facilityId) {
+        $stmt = $this->db->prepare("SELECT * FROM reviews WHERE facility_id = :facility_id");
+        $stmt->bindValue(':facility_id', $facilityId, SQLITE3_INTEGER);
+        $result = $stmt->execute();
+
+        if ($result === false) {
+            echo "Error executing query: " . $this->db->lastErrorMsg();
+            return [];
+        }
+
+        $reviews = [];
+        while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+            $reviews[] = $row;
+        }
+
+        return $reviews;
+    }
+    // In EcoFacilityModel.php
+        public function getUserById($userId) {
+            $stmt = $this->db->prepare("SELECT username FROM users WHERE id = :id");
+            $stmt->bindValue(':id', $userId, SQLITE3_INTEGER);
+            $result = $stmt->execute();
+            return $result->fetchArray(SQLITE3_ASSOC);
+}
+
 }
 ?>
